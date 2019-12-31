@@ -9,6 +9,7 @@ let title = document.getElementById('title');
 let scores = document.getElementById('scores');
 let intro = document.getElementById('intro');
 let quizElement = document.getElementById('quiz');
+let pageTitle = document.getElementById('page-title');
 
 let lyricElement = document.getElementById('lyric');
 let progressButton = document.getElementById('progress-button');
@@ -173,11 +174,13 @@ typewriter.pauseFor(2000)
 
 title.addEventListener('mouseenter', function(event) {
     // title.setAttribute('data-text', 'you are going to lose.');
-    title.innerHTML = 'you are going to lose.'
+    title.innerHTML = 'you are going to lose.';
+    pageTitle.innerHTML = 'you are going to lose.'
 });
 title.addEventListener('mouseleave', function(event) {
     // title.setAttribute('data-text', 'this quiz is about lyrics.');
-    title.innerHTML = 'this quiz is about lyrics.'
+    title.innerHTML = 'this quiz is about lyrics.';
+    pageTitle.innerHTML = 'this quiz is about lyrics.'
 });
 
 
