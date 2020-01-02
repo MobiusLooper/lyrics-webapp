@@ -12,21 +12,22 @@ let quizElement = document.getElementById('quiz');
 let pageTitle = document.getElementById('page-title');
 
 let lyricElement = document.getElementById('lyric');
-let progressButton = document.getElementById('progress-button');
+// let progressButton = document.getElementById('progress-button');
 let scoreElementHuman = document.getElementById('score-human');
 let scoreElementModel = document.getElementById('score-model');
-let questionNumber = document.getElementById('question-number');
-let winnerElement = document.getElementById('winner');
+// let questionNumber = document.getElementById('question-number');
+// let winnerElement = document.getElementById('winner');
 let lyricSection = document.getElementById('lyric-section');
 
 var guessHuman;
 var guessModel;
 var scoreHuman = 0;
 var scoreModel = 0;
-var question = 0;
+var questionNumber = 0;
 var answer;
 var probaDict;
 var pointLoaded;
+var terminalLen;
 var nextQuestionReady = true;
 const green = '#34B358';
 const red = '#C46060'; 
@@ -50,34 +51,27 @@ var quizGlobal;
 
 startButton.style.opacity = 0; // debug
 quizElement.style.display = 'none';
-
-questionNumber.style.visibility = 'hidden';
-winnerElement.style.visibility = 'hidden';
-lyricSection.style.visibility = 'hidden';
+// winnerElement.style.visibility = 'hidden';
+// lyricSection.style.visibility = 'hidden';
 
 dylanButton.addEventListener('click', function (event) {
-    guessHuman = 'Bob Dylan';
-    assessAnswer(guessHuman);
+    runAnswerAndLoad('Bob Dylan');
 });
 fitzgeraldButton.addEventListener('click', function (event) {
-    guessHuman = 'Ella Fitzgerald';
-    assessAnswer(guessHuman);
+    runAnswerAndLoad('Ella Fitzgerald');
 });
 johnButton.addEventListener('click', function (event) {
-    guessHuman = 'Elton John';
-    assessAnswer(guessHuman);
+    runAnswerAndLoad('Elton John');
 });
 partonButton.addEventListener('click', function (event) {
-    guessHuman = 'Dolly Parton';
-    assessAnswer(guessHuman);
+    runAnswerAndLoad('Dolly Parton');
 });
 bowieButton.addEventListener('click', function (event) {
-    guessHuman = 'David Bowie';
-    assessAnswer(guessHuman);
+    runAnswerAndLoad('David Bowie');
 });
-$(function () {
-  $('[data-toggle="tooltip"]').tooltip()
-});
+// $(function () {
+//   $('[data-toggle="tooltip"]').tooltip()
+// });
 
 var blurb = document.getElementById('blurb');
 
@@ -89,24 +83,23 @@ var typewriter = new Typewriter(blurb, {
 
 var welcomeStringArrows = ">>> "
 var welcomeStringDiv = "<p> </p>"
-var welcomeString1 = "You're going to see some lyrics."
-var welcomeString2 = "You're going to see some artists."
-var welcomeString3 = "You're going to match lyrics with artists."
-var welcomeString4 = "I'm a machine learning model."
-var welcomeString5 = "I'm also going to match lyrics with artists."
-var welcomeString6 = "It's what I've been trained to do."
-var welcomeString7 = "We're going to do this for ten songs."
-var welcomeString8 = "Our answers will be assessed."
-var welcomeString9 = "Our scores, calculated, totalled, and compared."
-var welcomeString10 = "You're going to lose."
+var welcomeString1 = "you are going to see some lyrics."
+var welcomeString2 = "you are going to see some artists."
+var welcomeString3 = "you are going to match lyrics with artists."
+var welcomeString4 = "i am a machine learning model."
+var welcomeString5 = "i am also going to match lyrics with artists."
+var welcomeString6 = "it is what i have been trained to do."
+var welcomeString7 = "we are going to do this for ten songs."
+var welcomeString8 = "our answers will be assessed."
+var welcomeString9 = "our scores, calculated, totalled, and compared."
+var welcomeString10 = "you are going to lose."
 var welcomeString11 = ", probably."
 
 var pauseFor = 800;
 // var pauseFor = 1; // debug
 
-typewriter.pauseFor(2000)
-// typewriter //debug
-    .typeString(welcomeStringArrows)
+typewriter.typeString(welcomeStringArrows)
+    .pauseFor(2000)
     .typeString(welcomeString1)
     .typeString(welcomeStringDiv)
     .typeString(welcomeStringArrows)
@@ -151,7 +144,6 @@ typewriter.pauseFor(2000)
     .callFunction(() => {startButton.style.opacity = 1.0;})
     .start();
 
-
 // function resetColors () {
 //     var buttonsArray = [
 //         dylanButton,
@@ -172,29 +164,16 @@ typewriter.pauseFor(2000)
 //     }, 300);
 // };
 
-title.addEventListener('mouseenter', function(event) {
-    // title.setAttribute('data-text', 'you are going to lose.');
-    title.innerHTML = 'you are going to lose.';
-    pageTitle.innerHTML = 'you are going to lose.'
-});
-title.addEventListener('mouseleave', function(event) {
-    // title.setAttribute('data-text', 'this quiz is about lyrics.');
-    title.innerHTML = 'this quiz is about lyrics.';
-    pageTitle.innerHTML = 'this quiz is about lyrics.'
-});
-
-
-function loadQuiz () {
-  $.getJSON('generate_quiz', function (json) {
-    sessionStorage.setItem("quizGlobal", json);
-  });
-};
-
-loadQuiz();
+// var typewriterLyric = new Typewriter(lyricElement, {
+//     delay: 20,
+//     // delay: 1, // debug
+//     cursor: "&#9608;",
+//     devMode: true
+// });
 
 function quizTransition () {
     var times = 0;
-    let switch_times = [60, 56, 52, 48, 44, 40, 38, 36, 34, 32, 30, 28, 26, 24, 22, 20, 16, 12, 8, 4, 0];
+    let switch_times = [40, 36, 32, 29, 26, 23, 20, 18, 16, 14, 12, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1];
     next_switch = switch_times.pop();
     console.log(next_switch);
     var intervalID = setInterval(function() {
@@ -202,8 +181,13 @@ function quizTransition () {
             quiz.style.display = (quiz.style.display == '' ? 'none' : '');
             intro.style.display = (intro.style.display == '' ? 'none' : '');
             next_switch = switch_times.pop();
-        }
-        if (times == 61) {
+        };
+        if (times == 41) {
+            loadNewQuestion();
+        };
+        if (times == 80) {
+            typewriterTerminal.typeString('>>> go on. take a guess.').start();
+            terminalLen = 'go on. take a guess.'.length;
             window.clearInterval(intervalID);
         };
         times++;
@@ -214,77 +198,127 @@ startButton.addEventListener('click', function (event) {
     quizTransition();
 });
 
-progressButton.addEventListener('click', function (event) {
-    if (question == 10) {
-        // resetQuiz();
-    };
+title.addEventListener('mouseenter', function(event) {
+    title.innerHTML = '>>> you are going to lose.';
+    pageTitle.innerHTML = '>>> you are going to lose.'
+});
+title.addEventListener('mouseleave', function(event) {
+    title.innerHTML = '>>> this quiz is about lyrics.';
+    pageTitle.innerHTML = '>>> this quiz is about lyrics.'
+});
+
+
+var typewriterTerminal = new Typewriter(document.getElementById('terminal'), {
+    delay: 30,
+    // delay: 1, // debug
+    cursor: "&#9608;"
+});
+
+function loadQuiz () {
+  $.getJSON('generate_quiz', function (json) {
+    sessionStorage.setItem("quizGlobal", json);
+  });
+};
+
+loadQuiz();
+
+function runAnswerAndLoad (guess) {
+    assessAnswer(guess);
+};
+
+function loadNewQuestion() {
     if (nextQuestionReady) {
-        progressButton.firstElementChild.firstElementChild.classList.add("disabled");
         bowieButton.firstElementChild.firstElementChild.classList.remove("disabled");
         fitzgeraldButton.firstElementChild.firstElementChild.classList.remove("disabled");
         partonButton.firstElementChild.firstElementChild.classList.remove("disabled");
         johnButton.firstElementChild.firstElementChild.classList.remove("disabled");
         dylanButton.firstElementChild.firstElementChild.classList.remove("disabled");
-        
-
         quizGlobal = JSON.parse(sessionStorage.getItem("quizGlobal"));
-        updateLyric(quizGlobal[question].lyrics);
-        answer = quizGlobal[question].artist;
-        guessModel = quizGlobal[question].prediction;
-        probaDict = quizGlobal[question].proba_dict;
-        // wordImportances = quizGlobal[question].word_importances;
-        question++;
-        // questionNumber.innerHTML = "Q".concat(question.toString());
-        // questionNumber.style.visibility = 'visible';
-        // resetBars();
+        var lyricText = '>>> ' + quizGlobal[questionNumber].lyrics.replace(/(?:\r\n|\r|\n)/g, '<br>>>> ');
+        questionTransition(lyricText)
+        answer = quizGlobal[questionNumber].artist;
+        guessModel = quizGlobal[questionNumber].prediction;
+        probaDict = quizGlobal[questionNumber].proba_dict;
         pointLoaded = true;
         nextQuestionReady = false;
-        progressButton.disabled = true;
-        // progressButton.innerHTML = 'Choose an artist';
-    } else {
-        // alert('Choose an artist before continuing with the next song.');
     };
-});
+};
 
-function resetQuiz () {
-    scoreHuman = -1;
-    scoreModel = -1;
-    updateScoreHuman();
-    updateScoreModel();
-    question = 0;
-    winnerElement.style.visibility = 'hidden';
-}
+function questionTransition (lyricText) {
+    var times = 0;
+    let switch_times = [22, 20, 18, 16, 14, 12, 10, 8, 6, 4, 2];
+    next_switch = switch_times.pop();
+    console.log(next_switch);
+    var old = lyricElement.innerHTML;
+    var version = 'old';
+    var intervalID = setInterval(function() {
+        if (times == next_switch) {
+            lyricElement.innerHTML = (version == 'old' ? lyricText : old);
+            version = (version == 'old' ? 'new' : 'old');
+            next_switch = switch_times.pop();
+        };
+        if (times == 23) {
+            window.clearInterval(intervalID);
+        };
+        times++;
+    }, 50);
+};
+
+
+
+// function resetQuiz () {
+//     scoreHuman = -1;
+//     scoreModel = -1;
+//     updateScoreHuman();
+//     updateScoreModel();
+//     question = 0;
+//     winnerElement.style.visibility = 'hidden';
+// }
 
 function assessAnswer (guessHuman) {
     if (pointLoaded) {
-        // buttonDict[answer].style.background = green;
-        // progressButton.disabled = false;
-        progressButton.firstElementChild.firstElementChild.classList.remove("disabled");
         bowieButton.firstElementChild.firstElementChild.classList.add("disabled");
         fitzgeraldButton.firstElementChild.firstElementChild.classList.add("disabled");
         partonButton.firstElementChild.firstElementChild.classList.add("disabled");
         johnButton.firstElementChild.firstElementChild.classList.add("disabled");
         dylanButton.firstElementChild.firstElementChild.classList.add("disabled");
-        // fillBars();
-//         padLyrics();
-        if (guessHuman == answer) {
+        if (guessHuman == answer && guessModel == answer) {
             updateScoreHuman();
-        } else {
-            // buttonDict[guessHuman].style.background = red;
-            var nothing = 23;
-        };
-        if (guessModel == answer) {
             updateScoreModel();
-        } else {
-            var nothing = 252;
+            typewriterTerminal
+                .deleteChars(terminalLen)
+                .typeString('one point each. well done.')
+                .start();
+            terminalLen = 'one point each. well done.'.length;
         };
-    } else {
-        // alert('Go to the next question, you answered this one already!');
+        if (guessHuman == answer && guessModel != answer) {
+            updateScoreHuman();
+            typewriterTerminal
+                .deleteChars(terminalLen)
+                .typeString('wow. you beat me on that one. do not get used to it.')
+                .start();
+            terminalLen = 'wow. you beat me on that one. do not get used to it.'.length;
+        };
+        if (guessHuman != answer && guessModel == answer) {
+            updateScoreModel();
+            typewriterTerminal
+                .deleteChars(terminalLen)
+                .typeString('that was [artist]. better luck next time.')
+                .start();
+            terminalLen = 'that was [artist]. better luck next time.'.length;
+        };
+        if (guessHuman != answer && guessModel != answer) {
+            typewriterTerminal
+                .deleteChars(terminalLen)
+                .typeString('that was [artist]. i did not get it either. so it was probably impossible for you.')
+                .start();
+            terminalLen = 'that was [artist]. i did not get it either. so it was probably impossible for you.'.length;
+        };
     };
     pointLoaded = false;
     nextQuestionReady = true;
-    if (question == 10) {
-        updateWinner();
+    if (questionNumber == 10) {
+        // updateWinner();
     }
 };
 
@@ -314,10 +348,6 @@ function updateScoreModel () {
     }, 90);
 };
 
-function updateLyric (lyricText) {
-    lyricSection.style.visibility = 'visible';
-    lyricElement.innerHTML = lyricText.replace(/(?:\r\n|\r|\n)/g, ',<br>');;
-};
 
 function updateWinner () {
     var winnerText;

@@ -49,7 +49,7 @@ body {
 }
 
 .retro-btn {
-  text-transform: uppercase;
+  /*text-transform: uppercase;*/
   background: 0 0;
   margin-bottom: 20px;
 }

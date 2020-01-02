@@ -41,6 +41,11 @@ body {background-color: var(--background-pink) !important;}
     white-space: pre-wrap;
 }
 */
+
+html {
+  scroll-behavior: smooth;
+}
+
 p.lyric {
     /*margin-left: 20px;*/
     /*text-indent: -9px;*/
@@ -117,7 +122,7 @@ div.blurb {
   /*position:relative;*/
   /*z-index:2;*/
   color: var(--dark-blue);
-  background: var(--bolder-pink); 
+  background: var(--bolder-pink);
   padding:2rem;
   margin-bottom: 100px;
   /*border: 5px solid var(--dark-blue);*/
@@ -186,4 +191,29 @@ div.blurb {
 	border-color: var(--me-score);
 }
 
+.correct {
+	margin-left: auto;
+	margin-right: auto;
+}
 
+.correct.box {
+	
+}
+
+.terminal {
+	margin-top: 80px;
+	margin-bottom: 80px;
+	border-radius: 10px;
+	border-style: solid;
+	margin-left: auto;
+	height: 70px;
+	padding: 20px;
+	border-color: #484848;
+	margin-right: auto;
+	font-family: 'Press Start 2P';
+	background-color: var(--backgrounder-pink);
+}
+
+.lyric.p {
+  /*margin-bottom: 5px;*/
+}

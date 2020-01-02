@@ -1,3 +1,8 @@
 *.pyc
 *.DS_Store
 credentials.json
+app/static/img/bowie.png
+app/static/img/dylan.png
+app/static/img/fitzgerald.png
+app/static/img/john.png
+app/static/img/parton.png

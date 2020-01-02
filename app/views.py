@@ -20,7 +20,6 @@ def generate_quiz():
 	NUM_QUESTIONS = 10
 	df_subset = df.sample(n=NUM_QUESTIONS).reset_index(drop=True)
 	df_subset['proba_dict'] = df_subset.apply(lambda x: x[[col for col in df_subset.columns.values if 'proba' in col]].to_dict(), axis=1)
-	# df_subset['word_importances'] = [get_word_importances(lyrics) for lyrics in df_subset.lyrics]
 	return json.dumps(df_subset.to_json(orient='records'))
 
 def load_df(dataset: dataikuapi.dss.dataset.DSSDataset):
