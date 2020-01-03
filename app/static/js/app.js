@@ -28,7 +28,6 @@ var answer;
 var probaDict;
 var pointLoaded;
 var terminalLen;
-var nextQuestionReady = true;
 const green = '#34B358';
 const red = '#C46060'; 
 const resetColor = '#696969';
@@ -51,8 +50,6 @@ var quizGlobal;
 
 startButton.style.opacity = 0; // debug
 quizElement.style.display = 'none';
-// winnerElement.style.visibility = 'hidden';
-// lyricSection.style.visibility = 'hidden';
 
 dylanButton.addEventListener('click', function (event) {
     runAnswerAndLoad('Bob Dylan');
@@ -69,15 +66,11 @@ partonButton.addEventListener('click', function (event) {
 bowieButton.addEventListener('click', function (event) {
     runAnswerAndLoad('David Bowie');
 });
-// $(function () {
-//   $('[data-toggle="tooltip"]').tooltip()
-// });
 
 var blurb = document.getElementById('blurb');
 
 var typewriter = new Typewriter(blurb, {
     delay: 30,
-    // delay: 1, // debug
     cursor: "&#9608;"
 });
 
@@ -96,7 +89,6 @@ var welcomeString10 = "you are going to lose."
 var welcomeString11 = ", probably."
 
 var pauseFor = 800;
-// var pauseFor = 1; // debug
 
 typewriter.typeString(welcomeStringArrows)
     .pauseFor(2000)
@@ -184,9 +176,10 @@ function quizTransition () {
         };
         if (times == 41) {
             loadNewQuestion();
+            window.scrollTo(0, document.body.scrollHeight);
         };
         if (times == 80) {
-            typewriterTerminal.typeString('>>> go on. take a guess.').start();
+            typewriterTerminal.typeString('go on.').pauseFor(1000).typeString(' take a guess.').start();
             terminalLen = 'go on. take a guess.'.length;
             window.clearInterval(intervalID);
         };
@@ -200,19 +193,19 @@ startButton.addEventListener('click', function (event) {
 
 title.addEventListener('mouseenter', function(event) {
     title.innerHTML = '>>> you are going to lose.';
-    pageTitle.innerHTML = '>>> you are going to lose.'
+    pageTitle.innerHTML = 'you are going to lose.'
 });
 title.addEventListener('mouseleave', function(event) {
     title.innerHTML = '>>> this quiz is about lyrics.';
-    pageTitle.innerHTML = '>>> this quiz is about lyrics.'
+    pageTitle.innerHTML = 'this quiz is about lyrics.'
 });
 
 
 var typewriterTerminal = new Typewriter(document.getElementById('terminal'), {
     delay: 30,
-    // delay: 1, // debug
     cursor: "&#9608;"
 });
+typewriterTerminal.typeString('>>> ').start();
 
 function loadQuiz () {
   $.getJSON('generate_quiz', function (json) {
@@ -224,25 +217,29 @@ loadQuiz();
 
 function runAnswerAndLoad (guess) {
     assessAnswer(guess);
+    resetTerminal();
+    setTimeout(loadNewQuestion(), 3000);
 };
 
 function loadNewQuestion() {
-    if (nextQuestionReady) {
-        bowieButton.firstElementChild.firstElementChild.classList.remove("disabled");
-        fitzgeraldButton.firstElementChild.firstElementChild.classList.remove("disabled");
-        partonButton.firstElementChild.firstElementChild.classList.remove("disabled");
-        johnButton.firstElementChild.firstElementChild.classList.remove("disabled");
-        dylanButton.firstElementChild.firstElementChild.classList.remove("disabled");
-        quizGlobal = JSON.parse(sessionStorage.getItem("quizGlobal"));
-        var lyricText = '>>> ' + quizGlobal[questionNumber].lyrics.replace(/(?:\r\n|\r|\n)/g, '<br>>>> ');
-        questionTransition(lyricText)
-        answer = quizGlobal[questionNumber].artist;
-        guessModel = quizGlobal[questionNumber].prediction;
-        probaDict = quizGlobal[questionNumber].proba_dict;
-        pointLoaded = true;
-        nextQuestionReady = false;
-    };
-};
+    bowieButton.firstElementChild.firstElementChild.classList.remove("disabled");
+    fitzgeraldButton.firstElementChild.firstElementChild.classList.remove("disabled");
+    partonButton.firstElementChild.firstElementChild.classList.remove("disabled");
+    johnButton.firstElementChild.firstElementChild.classList.remove("disabled");
+    dylanButton.firstElementChild.firstElementChild.classList.remove("disabled");
+    quizGlobal = JSON.parse(sessionStorage.getItem("quizGlobal"));
+    var lyricText = '>>> ' + quizGlobal[questionNumber].lyrics.replace(/(?:\r\n|\r|\n)/g, '<br>>>> ');
+    questionTransition(lyricText)
+    answer = quizGlobal[questionNumber].artist;
+    guessModel = quizGlobal[questionNumber].prediction;
+    probaDict = quizGlobal[questionNumber].proba_dict;
+    pointLoaded = true;
+    window.scrollTo(0, document.body.scrollHeight);
+ };
+
+function resetTerminal() {
+    typewriterTerminal.pauseFor(3000).deleteChars(terminalLen).start();
+}
 
 function questionTransition (lyricText) {
     var times = 0;
@@ -265,18 +262,12 @@ function questionTransition (lyricText) {
 };
 
 
-
-// function resetQuiz () {
-//     scoreHuman = -1;
-//     scoreModel = -1;
-//     updateScoreHuman();
-//     updateScoreModel();
-//     question = 0;
-//     winnerElement.style.visibility = 'hidden';
-// }
-
 function assessAnswer (guessHuman) {
     if (pointLoaded) {
+        if (questionNumber == 0) {
+            typewriterTerminal.deleteChars(terminalLen).start();
+        }
+        window.scrollTo(0, 0);
         bowieButton.firstElementChild.firstElementChild.classList.add("disabled");
         fitzgeraldButton.firstElementChild.firstElementChild.classList.add("disabled");
         partonButton.firstElementChild.firstElementChild.classList.add("disabled");
@@ -286,7 +277,6 @@ function assessAnswer (guessHuman) {
             updateScoreHuman();
             updateScoreModel();
             typewriterTerminal
-                .deleteChars(terminalLen)
                 .typeString('one point each. well done.')
                 .start();
             terminalLen = 'one point each. well done.'.length;
@@ -294,7 +284,6 @@ function assessAnswer (guessHuman) {
         if (guessHuman == answer && guessModel != answer) {
             updateScoreHuman();
             typewriterTerminal
-                .deleteChars(terminalLen)
                 .typeString('wow. you beat me on that one. do not get used to it.')
                 .start();
             terminalLen = 'wow. you beat me on that one. do not get used to it.'.length;
@@ -302,21 +291,18 @@ function assessAnswer (guessHuman) {
         if (guessHuman != answer && guessModel == answer) {
             updateScoreModel();
             typewriterTerminal
-                .deleteChars(terminalLen)
                 .typeString('that was [artist]. better luck next time.')
                 .start();
             terminalLen = 'that was [artist]. better luck next time.'.length;
         };
         if (guessHuman != answer && guessModel != answer) {
             typewriterTerminal
-                .deleteChars(terminalLen)
                 .typeString('that was [artist]. i did not get it either. so it was probably impossible for you.')
                 .start();
             terminalLen = 'that was [artist]. i did not get it either. so it was probably impossible for you.'.length;
         };
     };
     pointLoaded = false;
-    nextQuestionReady = true;
     if (questionNumber == 10) {
         // updateWinner();
     }
