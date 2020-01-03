@@ -303,6 +303,7 @@ function assessAnswer (guessHuman) {
         };
     };
     pointLoaded = false;
+    questionNumber++;
     if (questionNumber == 10) {
         // updateWinner();
     }
