@@ -48,24 +48,15 @@ var fullNameDict = {
 var quizStarted = false;
 var quizGlobal;
 
+var winCounts = {
+    'humanWin': 0,
+    'modelWin': 0,
+    'bothWin': 0,
+    'neitherWin': 0
+}
+
 startButton.style.opacity = 0; // debug
 quizElement.style.display = 'none';
-
-dylanButton.addEventListener('click', function (event) {
-    runAnswerAndLoad('Bob Dylan');
-});
-fitzgeraldButton.addEventListener('click', function (event) {
-    runAnswerAndLoad('Ella Fitzgerald');
-});
-johnButton.addEventListener('click', function (event) {
-    runAnswerAndLoad('Elton John');
-});
-partonButton.addEventListener('click', function (event) {
-    runAnswerAndLoad('Dolly Parton');
-});
-bowieButton.addEventListener('click', function (event) {
-    runAnswerAndLoad('David Bowie');
-});
 
 var blurb = document.getElementById('blurb');
 
@@ -136,32 +127,6 @@ typewriter.typeString(welcomeStringArrows)
     .callFunction(() => {startButton.style.opacity = 1.0;})
     .start();
 
-// function resetColors () {
-//     var buttonsArray = [
-//         dylanButton,
-//         fitzgeraldButton,
-//         johnButton,
-//         partonButton,
-//         bowieButton
-//     ];
-//     var arrayLength = buttonsArray.length;
-//     for (var i = 0; i < arrayLength; i++) {
-//         buttonsArray[i].style.background = resetColor;
-//     };
-// };
-
-// function resetBars () {
-//     $(".progress-bar").animate({
-//         width: "100%"
-//     }, 300);
-// };
-
-// var typewriterLyric = new Typewriter(lyricElement, {
-//     delay: 20,
-//     // delay: 1, // debug
-//     cursor: "&#9608;",
-//     devMode: true
-// });
 
 function quizTransition () {
     var times = 0;
@@ -176,15 +141,33 @@ function quizTransition () {
         };
         if (times == 41) {
             loadNewQuestion();
+            bowieButton.firstElementChild.firstElementChild.classList.add("disabled");
+            fitzgeraldButton.firstElementChild.firstElementChild.classList.add("disabled");
+            partonButton.firstElementChild.firstElementChild.classList.add("disabled");
+            johnButton.firstElementChild.firstElementChild.classList.add("disabled");
+            dylanButton.firstElementChild.firstElementChild.classList.add("disabled");
             window.scrollTo(0, document.body.scrollHeight);
         };
         if (times == 80) {
-            typewriterTerminal.typeString('go on.').pauseFor(1000).typeString(' take a guess.').start();
+            typewriterTerminal
+            .typeString('go on.')
+            .pauseFor(1000)
+            .typeString(' take a guess.')
+            .callFunction(enableArtistButtons)
+            .start();
             terminalLen = 'go on. take a guess.'.length;
             window.clearInterval(intervalID);
         };
         times++;
     }, 50);
+};
+
+function enableArtistButtons() {
+    bowieButton.firstElementChild.firstElementChild.classList.remove("disabled");
+    fitzgeraldButton.firstElementChild.firstElementChild.classList.remove("disabled");
+    partonButton.firstElementChild.firstElementChild.classList.remove("disabled");
+    johnButton.firstElementChild.firstElementChild.classList.remove("disabled");
+    dylanButton.firstElementChild.firstElementChild.classList.remove("disabled");
 };
 
 startButton.addEventListener('click', function (event) {
@@ -200,6 +183,22 @@ title.addEventListener('mouseleave', function(event) {
     pageTitle.innerHTML = 'this quiz is about lyrics.'
 });
 
+
+dylanButton.addEventListener('click', function (event) {
+    runAnswerAndLoad('Bob Dylan');
+});
+fitzgeraldButton.addEventListener('click', function (event) {
+    runAnswerAndLoad('Ella Fitzgerald');
+});
+johnButton.addEventListener('click', function (event) {
+    runAnswerAndLoad('Elton John');
+});
+partonButton.addEventListener('click', function (event) {
+    runAnswerAndLoad('Dolly Parton');
+});
+bowieButton.addEventListener('click', function (event) {
+    runAnswerAndLoad('David Bowie');
+});
 
 var typewriterTerminal = new Typewriter(document.getElementById('terminal'), {
     delay: 30,
@@ -217,11 +216,10 @@ loadQuiz();
 
 function runAnswerAndLoad (guess) {
     assessAnswer(guess);
-    resetTerminal();
-    setTimeout(loadNewQuestion(), 3000);
 };
 
 function loadNewQuestion() {
+    typewriterTerminal.deleteChars(terminalLen).start();
     bowieButton.firstElementChild.firstElementChild.classList.remove("disabled");
     fitzgeraldButton.firstElementChild.firstElementChild.classList.remove("disabled");
     partonButton.firstElementChild.firstElementChild.classList.remove("disabled");
@@ -229,7 +227,7 @@ function loadNewQuestion() {
     dylanButton.firstElementChild.firstElementChild.classList.remove("disabled");
     quizGlobal = JSON.parse(sessionStorage.getItem("quizGlobal"));
     var lyricText = '>>> ' + quizGlobal[questionNumber].lyrics.replace(/(?:\r\n|\r|\n)/g, '<br>>>> ');
-    questionFadeIn(lyricText)
+    setTimeout(function(){ questionFadeIn(lyricText); }, 500);
     answer = quizGlobal[questionNumber].artist;
     guessModel = quizGlobal[questionNumber].prediction;
     probaDict = quizGlobal[questionNumber].proba_dict;
@@ -237,9 +235,6 @@ function loadNewQuestion() {
     window.scrollTo(0, document.body.scrollHeight);
  };
 
-function resetTerminal() {
-    typewriterTerminal.pauseFor(3000).deleteChars(terminalLen).start();
-}
 
 function questionFadeIn (lyricText) {
     var times = 0;
@@ -273,6 +268,7 @@ function assessAnswer (guessHuman) {
             typewriterTerminal.deleteChars(terminalLen).start();
         }
         window.scrollTo(0, 0);
+        questionFadeOut();
         bowieButton.firstElementChild.firstElementChild.classList.add("disabled");
         fitzgeraldButton.firstElementChild.firstElementChild.classList.add("disabled");
         partonButton.firstElementChild.firstElementChild.classList.add("disabled");
@@ -283,6 +279,7 @@ function assessAnswer (guessHuman) {
             updateScoreModel();
             typewriterTerminal
                 .typeString('one point each. well done.')
+                .pauseFor(1000).callFunction(loadNewQuestion)
                 .start();
             terminalLen = 'one point each. well done.'.length;
         };
@@ -290,19 +287,22 @@ function assessAnswer (guessHuman) {
             updateScoreHuman();
             typewriterTerminal
                 .typeString('wow. you beat me on that one. do not get used to it.')
+                .pauseFor(1000).callFunction(loadNewQuestion)
                 .start();
             terminalLen = 'wow. you beat me on that one. do not get used to it.'.length;
         };
         if (guessHuman != answer && guessModel == answer) {
             updateScoreModel();
             typewriterTerminal
-                .typeString('that was [artist]. better luck next time.')
+                .typeString('that was [artist]. i got it. better luck next time.')
+                .pauseFor(1000).callFunction(loadNewQuestion)
                 .start();
-            terminalLen = 'that was [artist]. better luck next time.'.length;
+            terminalLen = 'that was [artist]. i got it. better luck next time.'.length;
         };
         if (guessHuman != answer && guessModel != answer) {
             typewriterTerminal
                 .typeString('that was [artist]. i did not get it either. so it was probably impossible for you.')
+                .pauseFor(1000).callFunction(loadNewQuestion)
                 .start();
             terminalLen = 'that was [artist]. i did not get it either. so it was probably impossible for you.'.length;
         };
@@ -312,6 +312,38 @@ function assessAnswer (guessHuman) {
     if (questionNumber == 10) {
         // updateWinner();
     }
+};
+
+function getResponse(scenario, correctAnswer) {
+    var responses = {
+        'humanWin': [
+            'wow. you beat me on that one. do not get used to it',
+            'well done. my trainer must have been inadequate.',
+            'you might as well quit on this high. you will get another right.',
+            'i am just lulling you into a false sense of security',
+            `you got lucky there.`
+        ],
+        'modelWin': [
+            `that was ${correctAnswer.toLowerCase()}. you need to up your game.`,
+            `${correctAnswer.toLowerCase()} there. and that was meant to be an easy one.`,
+            `${correctAnswer.toLowerCase()}. this is not going to be much fun if you do not take this seriously`,
+            `even my sysadmin knew that that was ${correctAnswer.toLowerCase()}.`,
+            `this is pretty one sided. that was ${correctAnswer.toLowerCase()}.`
+        ],
+        'bothWin': [
+            'nicely chosen.',
+            'maybe i have met my match',
+            'together we could conquer the world',
+            'do not get too smug. i got that one too.'
+        ],
+        'neitherWin': [
+            `apparently that was ${correctAnswer.toLowerCase()}.`,
+            `i don't have lungs. what is your excuse for getting that wrong. it was ${correctAnswer.toLowerCase()}`,
+            `${correctAnswer.toLowerCase()}? never heard of them. this quiz is rubbish.`,
+            `who even made this quiz?! it is disastrous. ${correctAnswer.toLowerCase()} made that song.`
+        ]
+    };
+    return responses[scenario][winCounts[scenario]++] 
 };
 
 
