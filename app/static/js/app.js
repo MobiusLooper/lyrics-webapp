@@ -269,6 +269,7 @@ function assessAnswer (guessHuman) {
         }
         window.scrollTo(0, 0);
         questionFadeOut();
+        var response;
         bowieButton.firstElementChild.firstElementChild.classList.add("disabled");
         fitzgeraldButton.firstElementChild.firstElementChild.classList.add("disabled");
         partonButton.firstElementChild.firstElementChild.classList.add("disabled");
@@ -277,34 +278,38 @@ function assessAnswer (guessHuman) {
         if (guessHuman == answer && guessModel == answer) {
             updateScoreHuman();
             updateScoreModel();
+            response = getResponse('bothWin', answer)
             typewriterTerminal
-                .typeString('one point each. well done.')
+                .typeString(response)
                 .pauseFor(1000).callFunction(loadNewQuestion)
                 .start();
-            terminalLen = 'one point each. well done.'.length;
+            terminalLen = response.length;
         };
         if (guessHuman == answer && guessModel != answer) {
             updateScoreHuman();
+            response = getResponse('humanWin', answer)
             typewriterTerminal
-                .typeString('wow. you beat me on that one. do not get used to it.')
+                .typeString(response)
                 .pauseFor(1000).callFunction(loadNewQuestion)
                 .start();
-            terminalLen = 'wow. you beat me on that one. do not get used to it.'.length;
+            terminalLen = response.length;
         };
         if (guessHuman != answer && guessModel == answer) {
             updateScoreModel();
+            response = getResponse('modelWin', answer)
             typewriterTerminal
-                .typeString('that was [artist]. i got it. better luck next time.')
+                .typeString(response)
                 .pauseFor(1000).callFunction(loadNewQuestion)
                 .start();
-            terminalLen = 'that was [artist]. i got it. better luck next time.'.length;
+            terminalLen = response.length;
         };
         if (guessHuman != answer && guessModel != answer) {
+            response = getResponse('neitherWin', answer)
             typewriterTerminal
-                .typeString('that was [artist]. i did not get it either. so it was probably impossible for you.')
+                .typeString(response)
                 .pauseFor(1000).callFunction(loadNewQuestion)
                 .start();
-            terminalLen = 'that was [artist]. i did not get it either. so it was probably impossible for you.'.length;
+            terminalLen = response.length;
         };
     };
     pointLoaded = false;
@@ -343,7 +348,7 @@ function getResponse(scenario, correctAnswer) {
             `who even made this quiz?! it is disastrous. ${correctAnswer.toLowerCase()} made that song.`
         ]
     };
-    return responses[scenario][winCounts[scenario]++] 
+    return responses[scenario][winCounts[scenario]++ % responses[scenario].length] 
 };
 
 
@@ -396,7 +401,6 @@ function updateWinner () {
         };
     }, 90);
 }
-
 
 
 
