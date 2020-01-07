@@ -229,7 +229,7 @@ function loadNewQuestion() {
     dylanButton.firstElementChild.firstElementChild.classList.remove("disabled");
     quizGlobal = JSON.parse(sessionStorage.getItem("quizGlobal"));
     var lyricText = '>>> ' + quizGlobal[questionNumber].lyrics.replace(/(?:\r\n|\r|\n)/g, '<br>>>> ');
-    questionTransition(lyricText)
+    questionFadeIn(lyricText)
     answer = quizGlobal[questionNumber].artist;
     guessModel = quizGlobal[questionNumber].prediction;
     probaDict = quizGlobal[questionNumber].proba_dict;
@@ -241,31 +241,13 @@ function resetTerminal() {
     typewriterTerminal.pauseFor(3000).deleteChars(terminalLen).start();
 }
 
-function questionTransition (lyricText) {
-    // var times = 0;
-    // let switch_times = [22, 20, 18, 16, 14, 12, 10, 8, 6, 4, 2];
-    // next_switch = switch_times.pop();
-    // console.log(next_switch);
-    // var old = lyricElement.innerHTML;
-    // var version = 'old';
-    // var intervalID = setInterval(function() {
-    //     if (times == next_switch) {
-    //         lyricElement.innerHTML = (version == 'old' ? lyricText : old);
-    //         version = (version == 'old' ? 'new' : 'old');
-    //         next_switch = switch_times.pop();
-    //     };
-    //     if (times == 23) {
-    //         window.clearInterval(intervalID);
-    //     };
-    //     times++;
-    // }, 50);
+function questionFadeIn (lyricText) {
     var times = 0;
     let opacity = 0;
     lyricElement.style.filter = `opacity(${opacity})`;
     lyricElement.innerHTML = lyricText;
     var intervalID = setInterval(function() {
-        opacity++;
-        lyricElement.style.filter = `opacity(${opacity / 3})`;
+        lyricElement.style.filter = `opacity(${++opacity / 3})`;
         if (times == 4) {
             window.clearInterval(intervalID);
         };
@@ -273,6 +255,17 @@ function questionTransition (lyricText) {
     }, 200);
 };
 
+function questionFadeOut () {
+    var times = 0;
+    let opacity = 3;
+    var intervalID = setInterval(function() {
+        lyricElement.style.filter = `opacity(${--opacity / 3})`;
+        if (times == 4) {
+            window.clearInterval(intervalID);
+        };
+        times++;
+    }, 200);
+};
 
 function assessAnswer (guessHuman) {
     if (pointLoaded) {
