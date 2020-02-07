@@ -4,7 +4,8 @@ let fitzgeraldButton = document.getElementById('fitzgerald-button');
 let johnButton = document.getElementById('john-button');
 let partonButton = document.getElementById('parton-button');
 let bowieButton = document.getElementById('bowie-button');
-let startButton = document.getElementById('start-button')
+let startButton = document.getElementById('start-button');
+let skipButton = document.getElementById('skip-button');
 let title = document.getElementById('title');
 let scores = document.getElementById('scores');
 let intro = document.getElementById('intro');
@@ -171,6 +172,9 @@ function enableArtistButtons() {
 };
 
 startButton.addEventListener('click', function (event) {
+    quizTransition();
+});
+skipButton.addEventListener('click', function (event) {
     quizTransition();
 });
 
